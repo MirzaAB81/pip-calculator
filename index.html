@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Live Pip Value Calculator</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f9f9f9; padding: 20px; }
+    #calc { max-width: 500px; margin: auto; padding:20px; border:1px solid #ccc; border-radius:8px; }
+    select, input, button { width: 100%; padding:8px; margin:5px 0; }
+    button { background: #2c3e50; color: white; border: none; border-radius: 5px; }
+    p { text-align: center; margin-top: 15px; font-weight:bold; }
+  </style>
+</head>
+<body>
+  <div id="calc">
+    <h3 style="text-align:center; color:#2c3e50;">Live Forex Pip Value Calculator</h3>
+    <label>Select Currency Pair:</label>
+    <select id="pair">
+      <option value="EUR/USD">EUR/USD</option>
+      <option value="GBP/USD">GBP/USD</option>
+      <option value="USD/JPY">USD/JPY</option>
+      <option value="USD/CHF">USD/CHF</option>
+      <option value="AUD/USD">AUD/USD</option>
+      <option value="NZD/USD">NZD/USD</option>
+      <option value="USD/CAD">USD/CAD</option>
+      <option value="EUR/GBP">EUR/GBP</option>
+      <option value="EUR/JPY">EUR/JPY</option>
+      <option value="GBP/JPY">GBP/JPY</option>
+      <option value="AUD/JPY">AUD/JPY</option>
+      <option value="CHF/JPY">CHF/JPY</option>
+      <option value="NZD/JPY">NZD/JPY</option>
+      <option value="EUR/AUD">EUR/AUD</option>
+      <option value="EUR/CHF">EUR/CHF</option>
+    </select>
+
+    <label>Lot Size:</label>
+    <input type="number" id="lots" step="0.01" value="1" />
+
+    <label>Account Currency:</label>
+    <select id="accountCurrency">
+      <option value="USD">USD</option>
+      <option value="EUR">EUR</option>
+      <option value="GBP">GBP</option>
+    </select>
+
+    <button onclick="calculate()">Calculate Pip Value</button>
+
+    <p id="result"></p>
+  </div>
+
+  <script>
+    async function calculate() {
+      const pair = document.getElementById('pair').value;
+      const lots = parseFloat(document.getElementById('lots').value);
+      const acc = document.getElementById('accountCurrency').value;
+      const [base, quote] = pair.split('/');
+      const pipSize = pair.includes('JPY') ? 0.01 : 0.0001;
+      const units = lots * 100000;
+
+      document.getElementById('result').innerText = '⏳ Calculating...';
+
+      try {
+        const resp = await fetch(`https://api.exchangerate.host/convert?from=${quote}&to=${acc}`);
+        const data = await resp.json();
+        if (!data.result) throw new Error();
+
+        const pv = (pipSize * units * data.result).toFixed(2);
+        document.getElementById('result').innerText = `✅ Pip Value: ${pv} ${acc}`;
+      } catch (e) {
+        document.getElementById('result').innerText = '❌ Error fetching rate';
+      }
+    }
+  </script>
+</body>
+</html>
